@@ -1,19 +1,23 @@
 <script setup lang="ts">
 // 页面协调层：连接业务仓库、3D 动画和各个操作面板。
-import { onBeforeUnmount, onMounted, ref } from 'vue'
-import { storeToRefs } from 'pinia'
-import CubeCanvas from '@/components/CubeCanvas.vue'
-import FaceEditor from '@/components/FaceEditor.vue'
-import MoveControls from '@/components/MoveControls.vue'
-import SolutionPanel from '@/components/SolutionPanel.vue'
-import { applyMove, invertMove } from '@/cube/facelets'
-import { useCubeStore } from '@/stores/cube'
-import type { Face, Facelets, MoveToken } from '@/types/cube'
+import { onBeforeUnmount, onMounted, ref } from "vue"
+import { storeToRefs } from "pinia"
+import CubeCanvas from "@/components/CubeCanvas.vue"
+import FaceEditor from "@/components/FaceEditor.vue"
+import MoveControls from "@/components/MoveControls.vue"
+import SolutionPanel from "@/components/SolutionPanel.vue"
+import { applyMove, invertMove } from "@/cube/facelets"
+import { useCubeStore } from "@/stores/cube"
+import type { Face, Facelets, MoveToken } from "@/types/cube"
 
 /** 子组件通过 defineExpose 暴露的实例方法，约束模板 ref 的调用方式。 */
 interface CubeCanvasExpose {
   // 播放转层动画；下一状态快照用于动画结束后的精确重建。
-  animateMove: (move: MoveToken, nextFacelets: Facelets, duration?: number) => Promise<void>
+  animateMove: (
+    move: MoveToken,
+    nextFacelets: Facelets,
+    duration?: number,
+  ) => Promise<void>
   // 恢复默认观察视角。
   resetView: () => void
 }
@@ -58,7 +62,11 @@ const playing = ref(false)
  * @param record 是否加入练习历史；撤销与复原播放时为 false。
  * @param duration 每次 90° 转动的持续时间，单位为毫秒。
  */
-async function performMove(move: MoveToken, record = true, duration?: number): Promise<void> {
+async function performMove(
+  move: MoveToken,
+  record = true,
+  duration?: number,
+): Promise<void> {
   if (isAnimating.value) return
   isAnimating.value = true
   // 预计算动画终点，不立即提交，避免响应式监听提前覆盖转层画面。
@@ -81,7 +89,7 @@ async function undo(): Promise<void> {
 }
 
 /** 停止自动播放，并切换练习/复原录入模式。 */
-function switchMode(nextMode: 'practice' | 'editor'): void {
+function switchMode(nextMode: "practice" | "editor"): void {
   playing.value = false
   store.setMode(nextMode)
 }
@@ -129,22 +137,26 @@ async function toggleAutoPlay(): Promise<void> {
 
 /** 自由练习键盘映射：面字母执行顺时针，Shift 加面字母执行逆时针。 */
 function handleKeydown(event: KeyboardEvent): void {
-  if (mode.value !== 'practice' || isAnimating.value) return
+  if (mode.value !== "practice" || isAnimating.value) return
   // 避免拦截浏览器组合快捷键和输入框内的正常输入。
   if (event.ctrlKey || event.metaKey || event.altKey) return
-  if (event.target instanceof HTMLInputElement || event.target instanceof HTMLTextAreaElement) return
+  if (
+    event.target instanceof HTMLInputElement ||
+    event.target instanceof HTMLTextAreaElement
+  )
+    return
 
   // 统一大小写后识别六个面字母。
   const face = event.key.toUpperCase()
-  if (!['U', 'R', 'F', 'D', 'L', 'B'].includes(face)) return
+  if (!["U", "R", "F", "D", "L", "B"].includes(face)) return
   // 已识别的动作键由应用处理，阻止浏览器默认行为。
   event.preventDefault()
-  void performMove(`${face}${event.shiftKey ? "'" : ''}` as MoveToken)
+  void performMove(`${face}${event.shiftKey ? "'" : ""}` as MoveToken)
 }
 
 // 挂载时注册全局键盘监听，卸载时移除以避免重复处理。
-onMounted(() => window.addEventListener('keydown', handleKeydown))
-onBeforeUnmount(() => window.removeEventListener('keydown', handleKeydown))
+onMounted(() => window.addEventListener("keydown", handleKeydown))
+onBeforeUnmount(() => window.removeEventListener("keydown", handleKeydown))
 </script>
 
 <template>
@@ -153,9 +165,7 @@ onBeforeUnmount(() => window.removeEventListener('keydown', handleKeydown))
     <header class="app-header">
       <a class="brand" href="#" aria-label="魔方助手首页">
         <span class="brand-mark">
-          <i /><i /><i />
-          <i /><i /><i />
-          <i /><i /><i />
+          <i /><i /><i /> <i /><i /><i /> <i /><i /><i />
         </span>
         <span>
           <strong>魔方助手</strong>
@@ -164,16 +174,28 @@ onBeforeUnmount(() => window.removeEventListener('keydown', handleKeydown))
       </a>
 
       <nav class="mode-tabs" aria-label="功能模式">
-        <button type="button" :class="{ active: mode === 'practice' }" @click="switchMode('practice')">
+        <button
+          type="button"
+          :class="{ active: mode === 'practice' }"
+          @click="switchMode('practice')"
+        >
           自由练习
         </button>
-        <button type="button" :class="{ active: mode === 'editor' }" @click="switchMode('editor')">
+        <button
+          type="button"
+          :class="{ active: mode === 'editor' }"
+          @click="switchMode('editor')"
+        >
           复原助手
-          <span>核心</span>
         </button>
       </nav>
 
-      <a class="github-link" href="https://github.com/Forevercpu/cube-assistant" target="_blank" rel="noreferrer">
+      <a
+        class="github-link"
+        href="https://github.com/Forevercpu/cube-assistant"
+        target="_blank"
+        rel="noreferrer"
+      >
         GitHub ↗
       </a>
     </header>
@@ -182,21 +204,33 @@ onBeforeUnmount(() => window.removeEventListener('keydown', handleKeydown))
       <!-- 根据模式显示介绍，并从逻辑状态派生完成提示。 -->
       <div class="intro-row">
         <div>
-          <p class="eyebrow">{{ mode === 'practice' ? '3D INTERACTIVE CUBE' : 'REAL CUBE SOLVER' }}</p>
-          <h1>{{ mode === 'practice' ? '转动、观察、熟悉每一面' : '把手中的魔方，带到屏幕上' }}</h1>
+          <p class="eyebrow">
+            {{
+              mode === "practice" ? "3D INTERACTIVE CUBE" : "REAL CUBE SOLVER"
+            }}
+          </p>
+          <h1>
+            {{
+              mode === "practice"
+                ? "转动、观察、熟悉每一面"
+                : "把手中的魔方，带到屏幕上"
+            }}
+          </h1>
           <p>
             {{
-              mode === 'practice'
-                ? '用鼠标观察魔方，通过按钮或键盘完成标准转层。所有动作都由独立逻辑状态驱动。'
-                : '依次录入六面颜色，系统检查状态后生成复原路线，再用 3D 动画一步一步带你完成。'
+              mode === "practice"
+                ? "用鼠标观察魔方，通过按钮或键盘完成标准转层。所有动作都由独立逻辑状态驱动。"
+                : "依次录入六面颜色，系统检查状态后生成复原路线，再用 3D 动画一步一步带你完成。"
             }}
           </p>
         </div>
         <div class="status-card" :class="{ solved }">
-          <span class="status-ring">{{ solved ? '✓' : '…' }}</span>
+          <span class="status-ring">{{ solved ? "✓" : "…" }}</span>
           <div>
             <small>当前状态</small>
-            <strong>{{ solved ? '已完成' : mode === 'editor' ? '等待复原' : '练习中' }}</strong>
+            <strong>{{
+              solved ? "已完成" : mode === "editor" ? "等待复原" : "练习中"
+            }}</strong>
           </div>
         </div>
       </div>
@@ -204,7 +238,11 @@ onBeforeUnmount(() => window.removeEventListener('keydown', handleKeydown))
       <!-- 左侧负责三维展示与播放，右侧负责颜色录入或快捷键说明。 -->
       <div class="workspace-grid">
         <div class="visual-column">
-          <CubeCanvas ref="cubeCanvas" :facelets="facelets" :disabled="isAnimating" />
+          <CubeCanvas
+            ref="cubeCanvas"
+            :facelets="facelets"
+            :disabled="isAnimating"
+          />
 
           <!-- 练习模式的按钮动作统一进入 performMove，保证动画与状态同步。 -->
           <MoveControls
@@ -229,9 +267,20 @@ onBeforeUnmount(() => window.removeEventListener('keydown', handleKeydown))
             @toggle-play="toggleAutoPlay"
           />
 
-          <section v-if="mode === 'editor' && solution.length === 0 && solved && !solveError" class="panel solved-note">
+          <section
+            v-if="
+              mode === 'editor' &&
+              solution.length === 0 &&
+              solved &&
+              !solveError
+            "
+            class="panel solved-note"
+          >
             <span>✓</span>
-            <div><strong>当前魔方已经完成</strong><p>修改任意非中心色块后，可以重新检查并生成路线。</p></div>
+            <div>
+              <strong>当前魔方已经完成</strong>
+              <p>修改任意非中心色块后，可以重新检查并生成路线。</p>
+            </div>
           </section>
         </div>
 
@@ -246,7 +295,10 @@ onBeforeUnmount(() => window.removeEventListener('keydown', handleKeydown))
             :solve-status="solveStatus"
             :solve-error="solveError"
             @update:selected-color="selectedColor = $event"
-            @sticker="(face: Face, index: number, color) => store.setSticker(face, index, color)"
+            @sticker="
+              (face: Face, index: number, color) =>
+                store.setSticker(face, index, color)
+            "
             @solve="solveCube"
             @reset="store.resetSolved"
           />
@@ -255,13 +307,25 @@ onBeforeUnmount(() => window.removeEventListener('keydown', handleKeydown))
             <p class="eyebrow">快捷操作</p>
             <h2>键盘也能转</h2>
             <div class="shortcut-list">
-              <div><kbd>R</kbd><span>右面顺时针</span><kbd>⇧ R</kbd><span>右面逆时针</span></div>
-              <div><kbd>U</kbd><span>上面顺时针</span><kbd>⇧ U</kbd><span>上面逆时针</span></div>
-              <div><kbd>F</kbd><span>前面顺时针</span><kbd>⇧ F</kbd><span>前面逆时针</span></div>
+              <div>
+                <kbd>R</kbd><span>右面顺时针</span><kbd>⇧ R</kbd
+                ><span>右面逆时针</span>
+              </div>
+              <div>
+                <kbd>U</kbd><span>上面顺时针</span><kbd>⇧ U</kbd
+                ><span>上面逆时针</span>
+              </div>
+              <div>
+                <kbd>F</kbd><span>前面顺时针</span><kbd>⇧ F</kbd
+                ><span>前面逆时针</span>
+              </div>
             </div>
             <div class="notation-note">
               <strong>公式怎么看？</strong>
-              <p>字母表示转动的面；带 <code>'</code> 表示逆时针；带 <code>2</code> 表示连续转两次 90°，共 180°。</p>
+              <p>
+                字母表示转动的面；带 <code>'</code> 表示逆时针；<br>
+                带 <code>2</code> 表示连续转两次 90°，共 180°。
+              </p>
             </div>
           </section>
         </aside>
@@ -269,8 +333,332 @@ onBeforeUnmount(() => window.removeEventListener('keydown', handleKeydown))
     </main>
 
     <footer>
-      <span>魔方助手 · 三阶魔方第一版</span>
-      <span>Vue 3 · TypeScript · Three.js · cubejs</span>
+      <span>© 2026 前端拌饭酱 - 保留所有权利。</span>
+      <a
+        href="https://beian.miit.gov.cn/"
+        target="_blank"
+        rel="noopener noreferrer"
+        >沪ICP备2026008444号</a
+      >
     </footer>
   </div>
 </template>
+
+<style scoped lang="scss">
+@use "./styles/shared";
+
+@include shared.eyebrow;
+@include shared.panel;
+
+.app-shell {
+  min-height: 100vh;
+}
+
+/* 吸顶页头：三列分别承载品牌、居中模式切换和右侧链接。 */
+.app-header {
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+  height: 72px;
+  padding: 0 max(32px, calc((100vw - 1440px) / 2));
+  border-bottom: 1px solid var(--line);
+  background: rgba(9, 12, 18, 0.86);
+  backdrop-filter: blur(20px);
+}
+
+/* 品牌名称及九宫格标志。 */
+.brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  color: inherit;
+  text-decoration: none;
+  justify-self: start;
+
+  > span:last-child {
+    display: grid;
+    gap: 1px;
+  }
+
+  strong {
+    font-size: 19px;
+    letter-spacing: 0.08em;
+  }
+
+  small {
+    font-size: 12px;
+    color: #758095;
+    letter-spacing: 0.2em;
+  }
+}
+
+/* 用 3×3 CSS 网格绘制魔方图标，不依赖图片资源。 */
+.brand-mark {
+  display: grid;
+  grid-template-columns: repeat(3, 6px);
+  gap: 2px;
+  padding: 7px;
+  border: 1px solid rgba(120, 228, 187, 0.35);
+  border-radius: 8px;
+  background: rgba(120, 228, 187, 0.08);
+  transform: rotate(-5deg);
+
+  i {
+    width: 6px;
+    height: 6px;
+    border-radius: 1px;
+    background: var(--primary);
+
+    &:nth-child(2n) {
+      opacity: 0.55;
+    }
+
+    &:nth-child(5) {
+      background: #fff;
+    }
+  }
+}
+
+/* 模式切换按钮的默认、悬停和选中状态。 */
+.mode-tabs {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.025);
+
+  button {
+    position: relative;
+    height: 44px;
+    padding: 0 24px;
+    border: 0;
+    border-radius: 7px;
+    color: #8994a5;
+    background: transparent;
+    cursor: pointer;
+    transition: 0.2s ease;
+
+    &:hover {
+      color: #dce4f1;
+    }
+
+    &.active {
+      color: #fff;
+      background: #202735;
+      box-shadow: 0 5px 14px rgba(0, 0, 0, 0.2);
+    }
+  }
+}
+
+.github-link {
+  justify-self: end;
+  color: #9da7b7;
+  text-decoration: none;
+  font-size: 15px;
+
+  &:hover {
+    color: #fff;
+  }
+}
+
+/* 页面内容限制最大宽度，同时保留两侧 32px 留白。 */
+.main-content {
+  width: min(1440px, calc(100% - 64px));
+  margin: 0 auto;
+  padding: 48px 0 64px;
+}
+
+.intro-row {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 32px;
+  margin-bottom: 28px;
+
+  h1 {
+    margin: 8px 0 10px;
+    font-size: clamp(34px, 3.2vw, 48px);
+    line-height: 1.12;
+    letter-spacing: -0.045em;
+  }
+
+  > div:first-child > p:last-child {
+    max-width: 720px;
+    margin: 0;
+    color: var(--muted);
+    line-height: 1.7;
+  }
+}
+
+/* 当前魔方状态卡；已复原时使用强调色边框与图标。 */
+.status-card {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 150px;
+  padding: 12px 16px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: rgba(17, 22, 31, 0.72);
+
+  &.solved {
+    border-color: rgba(120, 228, 187, 0.25);
+
+    .status-ring {
+      color: #06251b;
+      border-color: transparent;
+      background: var(--primary);
+    }
+  }
+
+  div {
+    display: grid;
+    gap: 3px;
+  }
+
+  small {
+    color: #697487;
+    font-size: 12px;
+  }
+
+  strong {
+    font-size: 15px;
+  }
+}
+
+.status-ring {
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  color: #9aa5b5;
+  border: 1px solid #384151;
+  background: #171d27;
+}
+
+/* 工作区左右双列：左列弹性伸展，右列固定宽度。 */
+.workspace-grid {
+  display: grid;
+  grid-template-columns: minmax(620px, 1fr) 460px;
+  align-items: start;
+  gap: 22px;
+}
+
+/* 右侧面板在滚动时保持可见，偏移量避开吸顶页头。 */
+.visual-column,
+.side-column {
+  display: grid;
+  gap: 18px;
+  min-width: 0;
+}
+
+.side-column {
+  position: sticky;
+  top: 90px;
+}
+
+/* 已复原且无需路线时显示完成提示。 */
+.solved-note {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 18px 22px;
+
+  > span {
+    display: grid;
+    place-items: center;
+    width: 38px;
+    height: 38px;
+    border-radius: 50%;
+    color: #08271e;
+    background: var(--primary);
+    font-weight: 900;
+  }
+
+  p {
+    margin: 4px 0 0;
+    color: var(--muted);
+    font-size: 14px;
+  }
+}
+
+/* 自由练习模式中的键盘说明与公式记号说明。 */
+.shortcuts-panel {
+  padding: 22px;
+}
+
+.shortcut-list {
+  display: grid;
+  gap: 10px;
+  margin-top: 18px;
+
+  > div {
+    display: grid;
+    grid-template-columns: 48px 1fr 58px 1fr;
+    align-items: center;
+    gap: 8px;
+    color: #818c9e;
+    font-size: 13px;
+  }
+}
+
+kbd {
+  display: grid;
+  place-items: center;
+  height: 34px;
+  border: 1px solid #303949;
+  border-bottom-width: 3px;
+  border-radius: 6px;
+  color: #d7deea;
+  background: #1c2330;
+  font-family: inherit;
+  font-size: 12px;
+}
+
+.notation-note {
+  margin-top: 20px;
+  padding: 14px;
+  border-radius: 10px;
+  background: #0d121a;
+
+  strong {
+    font-size: 14px;
+  }
+
+  p {
+    margin: 6px 0 0;
+    color: #788396;
+    font-size: 13px;
+    line-height: 1.6;
+  }
+
+  code {
+    color: var(--primary);
+  }
+}
+
+/* 页脚与主内容保持同一宽度及水平对齐。 */
+footer {
+  display: flex;
+  justify-content: space-between;
+  width: min(1440px, calc(100% - 64px));
+  margin: 0 auto;
+  padding: 22px 0 34px;
+  border-top: 1px solid var(--line);
+  color: #535e70;
+  font-size: 12px;
+  letter-spacing: 0.05em;
+}
+
+@media (max-width: 1200px) {
+  .workspace-grid {
+    grid-template-columns: minmax(570px, 1fr) 420px;
+  }
+}
+</style>

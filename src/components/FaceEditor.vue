@@ -123,3 +123,242 @@ const editorFaces: Face[] = ['U', 'L', 'F', 'R', 'B', 'D']
     <p v-if="!allColorsComplete" class="input-hint">颜色数量全部达到 9/9 后即可求解</p>
   </section>
 </template>
+
+<style scoped lang="scss">
+@use '../styles/shared';
+
+@include shared.eyebrow;
+@include shared.panel;
+@include shared.buttons;
+
+/* 实体魔方录入面板及方向提示。 */
+.editor-panel {
+  overflow: hidden;
+}
+
+.editor-heading {
+  border-bottom: 1px solid var(--line);
+}
+
+.orientation-callout {
+  display: flex;
+  gap: 10px;
+  margin: 16px 18px 14px;
+  padding: 11px 12px;
+  border: 1px solid rgba(110, 160, 255, 0.17);
+  border-radius: 9px;
+  background: rgba(80, 125, 210, 0.08);
+
+  p {
+    margin: 0;
+    color: #9ba7b8;
+    font-size: 13px;
+    line-height: 1.55;
+  }
+
+  strong {
+    color: #d9e3f3;
+  }
+}
+
+.callout-icon {
+  color: var(--blue);
+}
+
+/* 六列调色板，反馈选中画笔、颜色齐全或数量超出。 */
+.palette {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 5px;
+  padding: 0 18px 16px;
+}
+
+.palette-color {
+  display: grid;
+  justify-items: center;
+  gap: 4px;
+  min-width: 0;
+  padding: 7px 2px 5px;
+  border: 1px solid transparent;
+  border-radius: 8px;
+  color: #8c97a8;
+  background: #0d121a;
+  font-size: 12px;
+  cursor: pointer;
+
+  > span {
+    width: 26px;
+    height: 26px;
+    border: 2px solid rgba(255, 255, 255, 0.15);
+    border-radius: 50%;
+    box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.18);
+  }
+
+  small {
+    color: #5f6a7a;
+    font-size: 12px;
+
+    &.complete {
+      color: var(--primary);
+    }
+
+    &.over {
+      color: #ff716a;
+    }
+  }
+
+  &.active {
+    border-color: rgba(120, 228, 187, 0.55);
+    color: #fff;
+    background: rgba(120, 228, 187, 0.08);
+
+    > span {
+      box-shadow: 0 0 0 3px rgba(120, 228, 187, 0.18), inset 0 0 0 1px rgba(0, 0, 0, 0.18);
+    }
+  }
+}
+
+/* 展开图区域：U 在 F 上方、D 在 F 下方，中间排列 L/F/R/B。 */
+.cube-net {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  grid-template-areas: ". u . ." "l f r b" ". d . .";
+  gap: 8px;
+  padding: 2px 18px 20px;
+}
+
+.face-u {
+  grid-area: u;
+}
+
+.face-l {
+  grid-area: l;
+}
+
+.face-f {
+  grid-area: f;
+}
+
+.face-r {
+  grid-area: r;
+}
+
+.face-b {
+  grid-area: b;
+}
+
+.face-d {
+  grid-area: d;
+}
+
+.face-title {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  margin-bottom: 5px;
+  color: #677387;
+  font-size: 12px;
+
+  span {
+    display: grid;
+    place-items: center;
+    width: 20px;
+    height: 20px;
+    border-radius: 4px;
+    color: #dce4ef;
+    background: #242c3a;
+    font-size: 12px;
+  }
+}
+
+/* 每面用 3×3 网格显示色块，aspect-ratio 保证贴纸为正方形。 */
+.face-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 3px;
+  padding: 5px;
+  border-radius: 6px;
+  background: #080b10;
+}
+
+.sticker-button {
+  aspect-ratio: 1;
+  min-width: 0;
+  padding: 0;
+  border: 0;
+  border-radius: 3px;
+  box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.22);
+  cursor: pointer;
+  transition: transform 0.1s ease, filter 0.1s ease;
+
+  &:hover:not(:disabled) {
+    z-index: 1;
+    filter: brightness(1.12);
+    transform: scale(1.08);
+  }
+
+  /* 中心格展示该面的目标颜色，禁用编辑时仍保留完整亮度。 */
+  &.center {
+    cursor: default;
+    opacity: 1;
+  }
+
+  span {
+    display: grid;
+    place-items: center;
+    width: 20px;
+    height: 20px;
+    margin: auto;
+    border-radius: 50%;
+    color: #19212b;
+    background: rgba(255, 255, 255, 0.6);
+    font-size: 12px;
+    font-weight: 900;
+  }
+}
+
+/* 求解入口、数量提示和错误提示。 */
+.solve-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: calc(100% - 36px);
+  height: 50px;
+  margin: 0 18px 8px;
+}
+
+.input-hint {
+  margin: 0 18px 16px;
+  color: #626d80;
+  font-size: 12px;
+  text-align: center;
+}
+
+.error-message {
+  margin: 0 18px 12px;
+  padding: 10px 12px;
+  border: 1px solid rgba(255, 103, 97, 0.25);
+  border-radius: 8px;
+  color: #ffaaa6;
+  background: rgba(201, 55, 50, 0.09);
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+/* 通过旋转带有异色顶部边框的圆环表示后台计算中。 */
+.spinner {
+  width: 14px;
+  height: 14px;
+  border: 2px solid rgba(6, 39, 29, 0.25);
+  border-top-color: #06271d;
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+</style>

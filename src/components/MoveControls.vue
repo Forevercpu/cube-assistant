@@ -74,3 +74,71 @@ const moveGroups: { face: string; moves: MoveToken[] }[] = [
   </section>
 </template>
 
+<style scoped lang="scss">
+@use '../styles/shared';
+
+@include shared.eyebrow;
+@include shared.panel;
+@include shared.buttons;
+
+.keyboard-tip {
+  color: #687386;
+  font-size: 12px;
+}
+
+/* 六个面控制组，每组两列分别表示顺时针与逆时针。 */
+.move-grid {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 8px;
+  padding: 0 22px 20px;
+}
+
+.move-group {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 5px;
+
+  > span {
+    grid-column: 1 / -1;
+    margin-bottom: 1px;
+    color: #657084;
+    font-size: 12px;
+    text-align: center;
+  }
+
+  button {
+    height: 44px;
+    border: 1px solid #2a3342;
+    border-radius: 8px;
+    color: #d8e0ed;
+    background: #1b2230;
+    cursor: pointer;
+
+    &:hover:not(:disabled) {
+      border-color: rgba(120, 228, 187, 0.45);
+      color: var(--primary);
+      background: rgba(120, 228, 187, 0.08);
+      transform: translateY(-1px);
+    }
+  }
+}
+
+.control-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 14px 22px;
+  border-top: 1px solid var(--line);
+
+  .text-button {
+    margin-left: auto;
+  }
+}
+
+@media (max-width: 1200px) {
+  .move-grid {
+    gap: 5px;
+  }
+}
+</style>

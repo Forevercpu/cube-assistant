@@ -1,0 +1,87 @@
+/* 全局暗色主题与字体；下方自定义属性供所有组件共用。 */
+:root {
+  font-family:
+    Inter,
+    ui-sans-serif,
+    -apple-system,
+    BlinkMacSystemFont,
+    "Segoe UI",
+    "PingFang SC",
+    "Microsoft YaHei",
+    sans-serif;
+  color: #eef2f8;
+  background: #090c12;
+  font-size: 18px;
+  line-height: 1.5;
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+
+  /* 主面板背景色。 */
+  --surface: #11161f;
+
+  /* 次级表面背景色。 */
+  --surface-2: #171d28;
+
+  /* 半透明分隔线与边框色。 */
+  --line: rgba(255, 255, 255, 0.09);
+
+  /* 次要说明文字颜色。 */
+  --muted: #8d98aa;
+
+  /* 主要强调色，用于按钮、选中状态与完成提示。 */
+  --primary: #78e4bb;
+
+  /* 更深的强调色，预留给需要更高对比度的场景。 */
+  --primary-strong: #40ca96;
+
+  /* 辅助蓝色，用于方向提示和播放控件。 */
+  --blue: #6ea0ff;
+}
+
+/* 统一盒模型，使 width/height 包含 padding 和 border。 */
+* {
+  box-sizing: border-box;
+}
+
+/* 当前布局采用桌面最小宽度，窄窗口由浏览器产生横向滚动。 */
+html {
+  min-width: 1080px;
+  background: #090c12;
+}
+
+/* 清除默认边距，以叠加径向渐变营造页面环境光。 */
+body {
+  min-width: 1080px;
+  min-height: 100vh;
+  margin: 0;
+  background:
+    radial-gradient(circle at 18% 8%, rgba(56, 118, 255, 0.12), transparent 30%),
+    radial-gradient(circle at 82% 18%, rgba(47, 209, 150, 0.08), transparent 25%),
+    #090c12;
+}
+
+/* 统一交互元素字体，提供键盘焦点轮廓与禁用反馈。 */
+button,
+a {
+  font: inherit;
+
+  &:focus-visible {
+    outline: 2px solid var(--primary);
+    outline-offset: 3px;
+  }
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+button {
+  color: inherit;
+  font-size: 16px;
+
+  &:disabled {
+    cursor: not-allowed;
+    opacity: 0.45;
+  }
+}

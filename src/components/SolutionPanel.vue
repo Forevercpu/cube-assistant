@@ -88,3 +88,102 @@ const finished = computed(() => props.steps.length > 0 && props.index >= props.s
   </section>
 </template>
 
+<style scoped lang="scss">
+@use '../styles/shared';
+
+@include shared.eyebrow;
+@include shared.panel;
+@include shared.buttons;
+
+/* 复原路线摘要、横向可滚动步骤列表和播放操作区。 */
+.solution-panel {
+  overflow: hidden;
+}
+
+.solution-summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+  padding: 20px 22px;
+  border-bottom: 1px solid var(--line);
+}
+
+.step-counter {
+  display: flex;
+  align-items: baseline;
+  gap: 4px;
+  color: #657084;
+
+  strong {
+    color: var(--primary);
+    font-size: 26px;
+  }
+
+  span {
+    font-size: 13px;
+  }
+}
+
+.step-list {
+  display: flex;
+  gap: 7px;
+  overflow-x: auto;
+  padding: 16px 22px;
+  scrollbar-width: thin;
+}
+
+.step-chip {
+  display: grid;
+  place-items: center;
+  flex: 0 0 56px;
+  height: 56px;
+  border: 1px solid #2a3342;
+  border-radius: 8px;
+  color: #b6c0ce;
+  background: #171e29;
+
+  small {
+    color: #586376;
+    font-size: 12px;
+  }
+
+  /* 已执行步骤弱化显示，待执行步骤高亮显示。 */
+  &.done {
+    color: #658777;
+    border-color: rgba(120, 228, 187, 0.12);
+    background: rgba(120, 228, 187, 0.04);
+  }
+
+  &.active {
+    color: #071f18;
+    border-color: var(--primary);
+    background: var(--primary);
+    box-shadow: 0 6px 20px rgba(64, 202, 150, 0.15);
+
+    small {
+      color: rgba(7, 31, 24, 0.55);
+    }
+  }
+}
+
+/* 三列播放控制，中间按钮略宽。 */
+.solution-actions {
+  display: grid;
+  grid-template-columns: 1fr 1.15fr 1fr;
+  gap: 8px;
+  padding: 14px 22px;
+  border-top: 1px solid var(--line);
+}
+
+.play-button {
+  min-height: 44px;
+  border: 1px solid rgba(110, 160, 255, 0.3);
+  color: #aac5ff;
+  background: rgba(110, 160, 255, 0.08);
+}
+
+.next-button {
+  width: 100%;
+}
+</style>
