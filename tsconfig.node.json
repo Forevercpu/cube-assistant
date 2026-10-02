@@ -1,23 +1,38 @@
 {
   "compilerOptions": {
+    // 独立保存 Node.js 配置项目的增量检查缓存。
     "tsBuildInfoFile": "./node_modules/.tmp/tsconfig.node.tsbuildinfo",
+    // 以 ES2023 作为语法目标。
     "target": "es2023",
+    // 只提供 ES2023 标准库类型，构建配置不依赖浏览器 DOM。
     "lib": ["ES2023"],
+    // 提供 Node.js 内置模块和环境的类型。
     "types": ["node"],
+    // 跳过依赖声明文件内部检查，减少类型检查开销。
     "skipLibCheck": true,
 
     /* Bundler mode */
+    // 按 Node.js ESM/CJS 规则解析模块，与 package.json 的 type 配合。
     "module": "nodenext",
+    // 在不输出 JS 的检查模式中允许显式导入 .ts 扩展名。
     "allowImportingTsExtensions": true,
+    // 按源码保留模块语法，类型导入需明确使用 import type。
     "verbatimModuleSyntax": true,
+    // 将所有文件作为模块处理，避免声明污染全局作用域。
     "moduleDetection": "force",
+    // TS 仅检查类型，实际配置加载与打包由 Vite 负责。
     "noEmit": true,
 
     /* Linting */
+    // 检查未使用的局部声明。
     "noUnusedLocals": true,
+    // 检查未使用的函数参数。
     "noUnusedParameters": true,
+    // 仅允许可擦除的类型语法。
     "erasableSyntaxOnly": true,
+    // 禁止 switch 非空分支意外贯穿。
     "noFallthroughCasesInSwitch": true
   },
+  // 这里只检查在 Node.js 执行的 Vite 配置。
   "include": ["vite.config.ts"]
 }

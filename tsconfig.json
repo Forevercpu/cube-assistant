@@ -1,5 +1,7 @@
 {
+  // 根配置不直接编译文件，交由下面的两个子项目分别检查。
   "files": [],
+  // vue-tsc -b 按项目引用检查浏览器源码和 Node.js 构建配置。
   "references": [
     { "path": "./tsconfig.app.json" },
     { "path": "./tsconfig.node.json" }

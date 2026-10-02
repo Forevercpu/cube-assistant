@@ -1,3 +1,4 @@
 {
+  // 推荐 Vue 官方语言扩展，提供 Vue/TypeScript 补全与类型提示。
   "recommendations": ["Vue.volar"]
 }

@@ -1,14 +1,19 @@
 <!doctype html>
+<!-- 简体中文页面，lang 帮助浏览器与辅助技术识别内容语言。 -->
 <html lang="zh-CN">
   <head>
+    <!-- UTF-8 编码与移动设备视口设置。 -->
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <!-- 浏览器主题颜色与搜索摘要。 -->
     <meta name="theme-color" content="#0d1117" />
     <meta name="description" content="用 3D 动画练习魔方，并生成实体三阶魔方的复原步骤。" />
     <title>魔方助手｜3D 魔方复原与练习</title>
   </head>
   <body>
+    <!-- Vue 根应用挂载点，由 src/main.ts 接管内部内容。 -->
     <div id="app"></div>
+    <!-- ES 模块入口，开发时由 Vite 加载，构建时替换为打包资源。 -->
     <script type="module" src="/src/main.ts"></script>
   </body>
 </html>

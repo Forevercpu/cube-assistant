@@ -1,18 +1,28 @@
 {
+  // 继承 Vue 提供的浏览器 DOM 与单文件组件类型检查基础配置。
   "extends": "@vue/tsconfig/tsconfig.dom.json",
   "compilerOptions": {
+    // 增量类型检查缓存放在依赖目录的临时文件夹。
     "tsBuildInfoFile": "./node_modules/.tmp/tsconfig.app.tsbuildinfo",
+    // 加载 Vite 客户端声明，如资源导入和 import.meta.env。
     "types": ["vite/client"],
+    // 允许配套类型声明支持非标准扩展名的模块导入。
     "allowArbitraryExtensions": true,
+    // 为 TS 解析 @ 别名；实际运行时解析同时由 vite.config.ts 配置。
     "paths": {
       "@/*": ["./src/*"]
     },
 
     /* Linting */
+    // 报告未使用的局部变量、导入和声明。
     "noUnusedLocals": true,
+    // 报告未使用的函数参数。
     "noUnusedParameters": true,
+    // 限制为可通过擦除类型处理的 TS 语法，避免 enum 等运行时变换。
     "erasableSyntaxOnly": true,
+    // 检查 switch 中非空分支是否意外贯穿到下一分支。
     "noFallthroughCasesInSwitch": true
   },
+  // 浏览器项目覆盖源码中的 TS、TSX 和 Vue 单文件组件。
   "include": ["src/**/*.ts", "src/**/*.tsx", "src/**/*.vue"]
 }

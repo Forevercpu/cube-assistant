@@ -7,6 +7,7 @@ yarn-error.log*
 pnpm-debug.log*
 lerna-debug.log*
 
+# 忽略依赖、构建产物和本地环境配置；示例环境文件允许提交。
 node_modules
 dist
 dist-ssr
@@ -16,6 +17,7 @@ dist-ssr
 !.env.example
 
 # Editor directories and files
+# 编辑器配置默认不提交，仅保留团队扩展推荐。
 .vscode/*
 !.vscode/extensions.json
 .idea

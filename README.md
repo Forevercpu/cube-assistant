@@ -74,3 +74,36 @@ src/
 - 接入个人网站账号体系
 - 在线计时、每日挑战和排行榜
 - 对局回放与服务端成绩校验
+
+## 文件说明与注释约定
+
+源码中的中文注释说明函数职责、变量含义、类型约束和重要实现步骤。TypeScript 的类型声明只约束代码使用方式，不替代 Worker 中的运行时合法性校验。
+
+| 文件 | 职责 |
+| --- | --- |
+| `index.html` / `src/main.ts` | 页面元信息、Vue 挂载点与应用初始化 |
+| `src/App.vue` | 页面布局、键盘事件、动画与复原进度协调 |
+| `src/components/CubeCanvas.vue` | Three.js 场景的挂载、状态监听与资源销毁 |
+| `src/components/FaceEditor.vue` | 调色板、颜色统计、六面录入与求解入口 |
+| `src/components/MoveControls.vue` | 自由练习操作事件 |
+| `src/components/SolutionPanel.vue` | 复原动作说明、进度与播放控制 |
+| `src/stores/cube.ts` | 逻辑状态、历史、模式和异步求解请求 |
+| `src/cube/facelets.ts` | 配色、坐标映射、动作解析和色块置换 |
+| `src/cube/CubeScene.ts` | 三维模型、鼠标视角与转层动画 |
+| `src/cube/facelets.test.ts` | 转层可逆性与 cubejs 求解兼容性测试 |
+| `src/types/cube.ts` | 共享业务类型与 Worker 响应协议 |
+| `src/types/cubejs.d.ts` | cubejs 外部库类型声明 |
+| `src/workers/solver.worker.ts` | 状态合法性校验与后台求解 |
+| `src/style.css` | 全局主题、组件布局和交互状态 |
+| `vite.config.ts` | Vue 插件与源码路径别名 |
+| `tsconfig*.json` | 根项目引用、浏览器和 Node.js 类型检查配置 |
+| `.gitignore` / `.vscode/extensions.json` | Git 忽略规则与编辑器扩展推荐 |
+
+`package.json` 使用严格 JSON，不能直接插入注释，其字段说明如下：
+
+- `name`、`version` 标识项目；`private` 防止误发布至 npm；`type: module` 启用 ES 模块。
+- `scripts.dev` 启动开发服务器；`build` 先检查类型再构建；`typecheck` 只检查类型；`test` 运行现有测试；`preview` 预览构建产物。
+- `dependencies` 是应用依赖：Vue 负责组件，Pinia 管理状态，Three.js 渲染魔方，cubejs 负责求解。
+- `devDependencies` 提供构建、类型声明与测试工具；版本前缀 `^` 允许兼容的次版本/补丁更新，`~` 允许补丁更新。
+
+`pnpm-lock.yaml` 是自动生成的依赖锁定文件，`LICENSE` 是许可证原文；二者不插入额外注释。
