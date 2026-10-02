@@ -18,6 +18,15 @@ function cubejsCompatibility(): Plugin {
 // https://vite.dev/config/
 /** Vite 配置入口；defineConfig 提供配置类型提示。 */
 export default defineConfig({
+  server: {
+    proxy: {
+      '/api': {
+        target: 'http://139.224.196.60',
+        changeOrigin: true,
+        // rewrite: (path) => path.replace(/^\/api/, ''),
+      },
+    },
+  },
   // 解析 Vue 单文件组件及 script setup 的编译宏。
   plugins: [cubejsCompatibility(), vue()],
   optimizeDeps: {

@@ -18,19 +18,6 @@ import type {
   SolverResponse,
 } from '@/types/cube'
 
-// 模块级缓存：所有调用复用同一个 Worker 和已初始化的求解查找表。
-let solverWorker: Worker | null = null
-
-/** 首次求解时懒创建模块 Worker；URL 写法让 Vite 能打包独立线程入口。 */
-function getSolverWorker(): Worker {
-  if (!solverWorker) {
-    solverWorker = new Worker(new URL('../workers/solver.worker.ts', import.meta.url), {
-      type: 'module',
-    })
-  }
-  return solverWorker
-}
-
 /** 生成指定长度的随机公式，并排除连续两步转动同一面。 */
 function randomScramble(length = 20): MoveToken[] {
   // 随机选择的六个面；as const 保留面字母字面量类型。
@@ -51,8 +38,19 @@ function randomScramble(length = 20): MoveToken[] {
   return result
 }
 
-/** Pinia setup 仓库：统一管理色块、练习历史、录入状态和复原进度。 */
-export const useCubeStore = defineStore('cube', () => {
+/** 每个仓库分别创建色块、操作历史、复原进度和求解线程。 */
+function createCubeState() {
+  let solverWorker: Worker | null = null
+
+  function getSolverWorker(): Worker {
+    if (!solverWorker) {
+      solverWorker = new Worker(new URL('../workers/solver.worker.ts', import.meta.url), {
+        type: 'module',
+      })
+    }
+    return solverWorker
+  }
+
   // 当前逻辑状态；每次转动或编辑都替换为新对象。
   const facelets = ref<Facelets>(createSolvedFacelets())
   // 记录自由练习动作，撤销时取最后一步的逆操作。
@@ -68,8 +66,6 @@ export const useCubeStore = defineStore('cube', () => {
   const solveStatus = ref('')
   // 最近一次校验或求解的错误文本。
   const solveError = ref('')
-  // 联合类型限制为自由练习或实体魔方录入模式。
-  const mode = ref<'practice' | 'editor'>('practice')
 
   // 根据当前色块派生是否已复原。
   const solved = computed(() => isSolved(facelets.value))
@@ -80,7 +76,7 @@ export const useCubeStore = defineStore('cube', () => {
   // 当前待执行的动作，路线结束或尚未求解时返回 null。
   const currentSolutionMove = computed(() => solution.value[solutionIndex.value] ?? null)
 
-  /** 状态或模式变化后清空旧路线、进度与错误，防止使用过期结果。 */
+  /** 色块状态变化后清空旧路线、进度与错误，防止使用过期结果。 */
   function invalidateSolution(): void {
     solution.value = []
     solutionIndex.value = 0
@@ -129,12 +125,6 @@ export const useCubeStore = defineStore('cube', () => {
     next[face][index] = color
     facelets.value = next
     history.value = []
-    invalidateSolution()
-  }
-
-  /** 切换页面模式并使原复原路线失效。 */
-  function setMode(nextMode: 'practice' | 'editor'): void {
-    mode.value = nextMode
     invalidateSolution()
   }
 
@@ -235,7 +225,6 @@ export const useCubeStore = defineStore('cube', () => {
     solving,
     solveStatus,
     solveError,
-    mode,
     solved,
     counts,
     colorsComplete,
@@ -245,8 +234,10 @@ export const useCubeStore = defineStore('cube', () => {
     resetSolved,
     scramble,
     setSticker,
-    setMode,
     solve,
     clearSolution,
   }
-})
+}
+
+export const useCubeStore = defineStore('cube', createCubeState)
+export const useRestoreCubeStore = defineStore('restore-cube', createCubeState)
