@@ -12,9 +12,7 @@ node_modules
 dist
 dist-ssr
 *.local
-.env
-.env.*
-!.env.example
+
 
 # Editor directories and files
 # 编辑器配置默认不提交，仅保留团队扩展推荐。
