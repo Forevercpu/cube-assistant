@@ -39,8 +39,9 @@ async function animateMove(
   move: MoveToken,
   nextFacelets: Facelets,
   duration?: number,
+  reverseHalfTurn = false,
 ): Promise<void> {
-  await cubeScene?.animateMove(move, nextFacelets, duration)
+  await cubeScene?.animateMove(move, nextFacelets, duration, reverseHalfTurn)
 }
 
 /** 恢复视角，既供舞台按钮使用，也对父组件公开。 */

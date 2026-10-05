@@ -1,6 +1,6 @@
 // 魔方业务状态仓库；组件通过 ref/computed 读取状态，通过 action 修改状态。
 import { computed, ref } from 'vue'
-import { defineStore } from 'pinia'
+import { acceptHMRUpdate, defineStore } from 'pinia'
 import {
   applyMove,
   cloneFacelets,
@@ -88,6 +88,22 @@ function createCubeState() {
     facelets.value = applyMove(facelets.value, move)
     if (record) history.value.push(move)
     return cloneFacelets(facelets.value)
+  }
+
+  /** 直接切到指定待执行步骤，统一提交状态，避免逐步播放动画。 */
+  function seekSolutionStep(targetIndex: number): void {
+    if (!Number.isInteger(targetIndex) || targetIndex < 0 || targetIndex > solution.value.length) return
+    if (targetIndex === solutionIndex.value) return
+
+    let next = cloneFacelets(facelets.value)
+    for (let index = solutionIndex.value; index < targetIndex; index += 1) {
+      next = applyMove(next, solution.value[index]!)
+    }
+    for (let index = solutionIndex.value; index > targetIndex; index -= 1) {
+      next = applyMove(next, invertMove(solution.value[index - 1]!))
+    }
+    facelets.value = next
+    solutionIndex.value = targetIndex
   }
 
   /** 弹出最近的练习动作并返回逆操作；实际转动由页面统一播放。 */
@@ -230,6 +246,7 @@ function createCubeState() {
     colorsComplete,
     currentSolutionMove,
     commitMove,
+    seekSolutionStep,
     takeUndoMove,
     resetSolved,
     scramble,
@@ -241,3 +258,9 @@ function createCubeState() {
 
 export const useCubeStore = defineStore('cube', createCubeState)
 export const useRestoreCubeStore = defineStore('restore-cube', createCubeState)
+
+// 保存代码时保留当前录入、复原路线及进度，避免热更新重置为已复原状态。
+if (import.meta.hot) {
+  import.meta.hot.accept(acceptHMRUpdate(useCubeStore, import.meta.hot))
+  import.meta.hot.accept(acceptHMRUpdate(useRestoreCubeStore, import.meta.hot))
+}

@@ -12,11 +12,13 @@ const props = defineProps<{
   index: number
   // 是否开启自动播放，用于切换按钮文案。
   playing: boolean
+  // 自动播放倍速，手动单步仍使用标准速度。
+  playbackRate: number
   // 单步动画期间禁止新的进度操作。
   disabled: boolean
 }>()
 
-/** 无参数播放控制事件，进度实际由父组件更新。 */
+/** 播放和步骤选择事件，进度实际由父组件更新。 */
 const emit = defineEmits<{
   // 请求撤销上一个复原动作。
   previous: []
@@ -24,7 +26,12 @@ const emit = defineEmits<{
   next: []
   // 请求切换自动播放状态。
   togglePlay: []
+  // 请求切到指定待执行步骤。
+  selectStep: [index: number]
+  updatePlaybackRate: [rate: number]
 }>()
+
+const playbackRates = [0.5, 0.75, 1, 1.25, 1.5]
 
 // 当前待执行动作；路线为空或执行完毕时返回 null。
 const currentMove = computed(() => props.steps[props.index] ?? null)
@@ -48,7 +55,7 @@ const finished = computed(() => props.steps.length > 0 && props.index >= props.s
       </div>
     </div>
 
-    <!-- 路线只作展示：active 为待执行，done 为已完成，不允许跳步点击。 -->
+    <!-- 点击切到该步执行前的状态：active 为待执行，done 为已完成。 -->
     <div class="step-list">
       <button
         v-for="(step, stepIndex) in steps"
@@ -56,10 +63,28 @@ const finished = computed(() => props.steps.length > 0 && props.index >= props.s
         type="button"
         class="step-chip"
         :class="{ active: stepIndex === index, done: stepIndex < index }"
-        disabled
+        :disabled="disabled"
+        :aria-current="stepIndex === index ? 'step' : undefined"
+        :title="`跳转到第 ${stepIndex + 1} 步（执行前）：${moveDescription(step)}`"
+        @click="emit('selectStep', stepIndex)"
       >
         <small>{{ stepIndex + 1 }}</small>
         {{ step }}
+      </button>
+    </div>
+
+    <div class="playback-speed" role="group" aria-label="自动播放倍速">
+      <span>播放倍速</span>
+      <button
+        v-for="rate in playbackRates"
+        :key="rate"
+        type="button"
+        class="speed-button"
+        :class="{ selected: rate === playbackRate }"
+        :aria-pressed="rate === playbackRate"
+        @click="emit('updatePlaybackRate', rate)"
+      >
+        {{ rate }}X
       </button>
     </div>
 
@@ -142,6 +167,18 @@ const finished = computed(() => props.steps.length > 0 && props.index >= props.s
   border-radius: 8px;
   color: #b6c0ce;
   background: #171e29;
+  cursor: pointer;
+
+  &:hover:not(:disabled),
+  &:focus-visible {
+    border-color: var(--primary);
+    outline: 2px solid var(--primary);
+    outline-offset: 2px;
+  }
+
+  &:disabled {
+    cursor: wait;
+  }
 
   small {
     color: #586376;
@@ -164,6 +201,47 @@ const finished = computed(() => props.steps.length > 0 && props.index >= props.s
     small {
       color: rgba(7, 31, 24, 0.55);
     }
+  }
+}
+
+.playback-speed {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding: 12px 22px;
+  border-top: 1px solid var(--line);
+
+  > span {
+    margin-right: 4px;
+    color: var(--muted);
+    font-size: 13px;
+  }
+}
+
+.speed-button {
+  min-height: 32px;
+  padding: 5px 12px;
+  border: 1px solid #2a3342;
+  border-radius: 8px;
+  color: #b6c0ce;
+  background: #171e29;
+  cursor: pointer;
+
+  &.selected {
+    color: var(--primary);
+    border-color: var(--primary);
+    background: rgba(120, 228, 187, 0.08);
+  }
+
+  &:hover,
+  &:focus-visible {
+    border-color: var(--primary);
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--primary);
+    outline-offset: 2px;
   }
 }
 

@@ -192,11 +192,13 @@ export class CubeScene {
    * @param move 要播放的标准面动作。
    * @param nextFacelets 由逻辑层预计算的转动后状态。
    * @param duration 每次 90° 转动的持续时间，单位为毫秒。
+   * @param reverseHalfTurn 后退半圈时反转动画方向，最终逻辑状态保持一致。
    * @returns 动画播放并重建完成后兑现的 Promise。
    */
-  async animateMove(move: MoveToken, nextFacelets: Facelets, duration = 650): Promise<void> {
+  async animateMove(move: MoveToken, nextFacelets: Facelets, duration = 650, reverseHalfTurn = false): Promise<void> {
     // 从动作记号获取选层规则与动画弧度。
     const { definition, angle } = parseMove(move)
+    const animationAngle = reverseHalfTurn && move.endsWith('2') ? -angle : angle
     // 位于魔方原点的临时父节点，统一驱动整层旋转。
     const pivot = new THREE.Group()
     this.cubeRoot.add(pivot)
@@ -213,14 +215,15 @@ export class CubeScene {
     // 半圈拆成两次 90°，在中间停顿，让用户能辨认并跟随两次转动。
     const turns = move.endsWith('2') ? 2 : 1
     for (let turn = 0; turn < turns; turn += 1) {
-      if (turn > 0) await new Promise((resolve) => window.setTimeout(resolve, 220))
+      // 半圈中间的停顿与单次转动时长同比缩放，保持倍速一致。
+      if (turn > 0) await new Promise((resolve) => window.setTimeout(resolve, 220 * duration / 650))
       const startedAt = performance.now()
       await new Promise<void>((resolve) => {
         const step = (now: number) => {
           const progress = Math.min((now - startedAt) / duration, 1)
           // 平滑起步和收尾，避免大部分角度在最初几帧内完成。
           const eased = progress * progress * (3 - 2 * progress)
-          pivot.rotation[definition.axis] = (angle / turns) * (turn + eased)
+          pivot.rotation[definition.axis] = (animationAngle / turns) * (turn + eased)
 
           if (progress < 1) requestAnimationFrame(step)
           else resolve()

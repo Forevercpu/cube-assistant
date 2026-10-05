@@ -16,6 +16,7 @@ interface CubeCanvasExpose {
     move: MoveToken,
     nextFacelets: Facelets,
     duration?: number,
+    reverseHalfTurn?: boolean,
   ) => Promise<void>
   // 恢复默认观察视角。
   resetView: () => void
@@ -38,6 +39,7 @@ async function performMove(
   move: MoveToken,
   record = true,
   duration?: number,
+  reverseHalfTurn = false,
 ): Promise<void> {
   // 捕获操作所属模式，切换页面后仍只更新原来的魔方。
   const moveMode = mode.value
@@ -49,7 +51,7 @@ async function performMove(
   const nextFacelets = applyMove(store.facelets, move)
 
   try {
-    await canvas?.animateMove(move, nextFacelets, duration)
+    await canvas?.animateMove(move, nextFacelets, duration, reverseHalfTurn)
     store.commitMove(move, record)
   } finally {
     // 即使动画失败也释放互斥标记，避免界面一直禁用。
